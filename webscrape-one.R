@@ -14,10 +14,11 @@ if (!("dplyr" %in% installed.packages())) {
   }
 library(rvest) # (also installs xml2)
 library(dplyr)
+library(curl)
 
 # Tell it what page to scrape
 
-item1page <- "https://paperspast.natlib.govt.nz/newspapers/PBH19380602.2.27?query=flooding+marae&snippet=true#text-tab"
+item1page <- "https://api.digitalnz.org/v3/records/18388766.xml?api_key=M2w8CXHEAaiExaTTxXQG"
 
 ### recall to follow along live:
   # cmd option C shows the code of the site 
@@ -27,20 +28,9 @@ item1page <- "https://paperspast.natlib.govt.nz/newspapers/PBH19380602.2.27?quer
 #  <div class="article-message">This article text was automatically generated and may include errors. <a href="/newspapers/poverty-bay-herald/1938/06/02/4">View the full page</a> to see article in its original form.</div>
 #</div>
 
-item1 <- read_html(item1page)
+item1 <- read_xml(item1page)
 item1
-str(item1)
 
-body_nodes <- item1 %>% 
-  html_node("body")  %>% 
-  html_children()
-body_nodes
-
-
-text1 <- item1 %>% 
-  xml2::xml_find_all("//div[contains(@itemprop, 'articleBody')]") %>% 
-  rvest::html_text()
-text1
 
 ###### References
 

@@ -34,7 +34,7 @@ server <- shinyServer(function(input, output) {
 ui <- shinyUI(fluidPage(
   
   #Add a title
-  titlePanel("Whakahura: Extreme Weather Events and the Emergence of CLimate Change"),
+  titlePanel("Whakahura: Extreme Weather Events and the Emergence of Climate Change"),
   
   #This creates a layout with a left sidebar and main section
   sidebarLayout(
