@@ -67,7 +67,7 @@ record_df <- data.frame(record_id, title, date, full_text, source_link, publishe
 ### Using a set of phrases to search for records
 
 # url this: 
-marae_flooding_call <- "https://api.digitalnz.org/v3/records.xml?api_key=M2w8CXHEAaiExaTTxXQG&text=kainga+earthquake+damage"
+marae_flooding_call <- "https://api.digitalnz.org/v3/records.xml?api_key=M2w8CXHEAaiExaTTxXQG&text=kaingaearthquake+damage"
 marae_flooding_pages <- read_html(marae_flooding_call)
 
 result_count <- as.character(
