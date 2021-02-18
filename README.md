@@ -1,5 +1,7 @@
 # Compiling the digital stories of extreme weather and earthquake impacts to Māori cultural infrastructure  
 
+Kia ora koutou, nau mai! 
+
 The whakahura-waipake repository compiles Sally Owen's work to date of scraping and encoding korero (stories) of extreme weather and earthquake impacts in Aotearoa New Zealand which impacted our indigenous cultural infrastructures. 
 
 Digital NZ resources containing sets of search terms (e.g. marae+flooding) are harvested by an R programme, which encodes these results in RDF using the JSON-LD serialisation format. Linked.art ontology (from the cultural heritage space) is used for the RDF encoding. This RDF will be loaded into a TripleStor for quality-assurance and then SPARKL query. 
