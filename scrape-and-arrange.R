@@ -1,114 +1,141 @@
 #################################################
 
-# Working on arranging the scrape into rdf 
+# Digital NZ resources are harvested by this R programme, 
+# which will encode these in RDF using the JSON-LD 
+# serialisation format. Linked.art ontology is proposed for 
+# the RDF encoding. This RDF will be loaded into a 
+# TripleStor for SPARKL query.  
 
 #################################################
 
 # Prep: packages
+packages_to_install <- c("rvest", 
+                         "dplyr", 
+                         "curl", 
+                         "rdflib",
+                         "tidyr",
+                         "tibble",
+                         "jsonld",
+                         "jsonlite",
+                         "purrr",
+                         "XML",
+                         "rjson"
+                         )
 
-if (!("rvest" %in% installed.packages())) {
-  install.packages("rvest")
-}
-if (!("dplyr" %in% installed.packages())) {
-  install.packages("dplyr")
-}
+for (i in length(packages_to_install)){
+  if (!(packages_to_install[i] %in% installed.packages())) {
+  install.packages(packages_to_install[i])
+    }
+  }
 
-if (!("curl" %in% installed.packages())) {
-  install.packages("curl")
-}
+# Call packages: 
 
-if (!("rdflib" %in% installed.packages())) {
-  install.packages("rdflib")
-}
-
-if (!("tidyr" %in% installed.packages())) {
-  install.packages("tidyr")
-}
-
-if (!("tibble" %in% installed.packages())) {
-  install.packages("tibble")
-}
-
-if (!("jsonld" %in% installed.packages())) {
-  install.packages("jsonld")
-}
-
-library(rvest) # (also installs xml2)
+library(rvest) # (also calls xml2)
+#library(xml2)
 library(dplyr)
 library(curl)
 library(rdflib)
 library(tidyr)
 library(tibble)
 library(jsonld)
+library(jsonlite)
+library(purrr)
+library(XML)
+library(rjson)
+
 
 #################################################
 
-# Scrape one set of terms:
+# Scrape:
   
-  ### Using a set of phrases to search for records
+  ### Using a set of phrases to search for records on DigitalNZ 
   
-  # url this: 
-  search_term <- "kainga+earthquake+damage"
+  # url creation - adding specifiers: 
+  search_term <- "&text=marae+flooding" 
+  #usage_term <- "&usage=Share" #only collect share-able items
+  
 
-  call <- paste("https://api.digitalnz.org/v3/records.xml?api_key=M2w8CXHEAaiExaTTxXQG&text=",
+  call <- paste("https://api.digitalnz.org/v3/records.xml?api_key=M2w8CXHEAaiExaTTxXQG",
                 search_term, 
+                #usage_term,
+                "&per_page=100",
+                "&sort=date",
                 sep = "")
   
-  call_pages <- read_html(call)
-  
+  doc <- read_html(call)
+
   result_count <- as.character(
-    call_pages %>% 
+    doc %>% 
       rvest::html_node("search") %>%
       xml2::xml_find_all("result-count") %>% 
       rvest::html_text())
   
-  # harvest record_id, title, date, full_text, publisher, link 
-  record_id <- call_pages %>% 
+  print(paste("Using", search_term, "this scrape finds", result_count, "terms"))
+  
+  # # Second page of results (as result_count > 100)
+  # call2 <- paste("https://api.digitalnz.org/v3/records.xml?api_key=M2w8CXHEAaiExaTTxXQG",
+  #                search_term, 
+  #                #usage_term,
+  #                "&per_page=100",
+  #                "&page=2",
+  #               "&sort=date",
+  #                sep = "")
+  # call_page2 <- read_html(call2)
+  
+  # harvest record_id, title, date published, full_text, publisher, links (in two lots if there are two pages)
+  harvest <- function(x, y) {output <- x %>% 
     rvest::html_nodes("search") %>% 
-    xml2::xml_find_all("//results/result/id") %>% 
+    xml2::xml_find_all(paste("//results", y)) %>% 
     rvest::html_text()
+  return(output)
+  }
   
-  date <- call_pages %>% 
-    rvest::html_nodes("search") %>% 
-    xml2::xml_find_all("//results/result/display-date") %>% 
-    rvest::html_text()
+  x <- doc
+  y <- c("/result/id")
+  record_id <- harvest(doc, y)
+  y <- c("/result/display-date")
+  display_date <- harvest(doc, y)
+  y <- c("/result/source-url")
+  page_link <- harvest(doc, y)
+  y <- c("/result/landing-url")
+  api_link <- harvest(doc, y)
+  y <- c("/result/content-partner")
+  publisher <- harvest(doc, y)
+  y <- c("/result/title")
+  title <- harvest(doc, y)
+  y <- c("/result/usage")
+  usage <- harvest(doc, y)
+  y <- c("/result/fulltext")
+  full_text <- harvest(doc, y)
+  #y <- c("")
+  # <- harvest(doc, y)
+
+  # Arrange scraped results as dataframe: 
+  call_results_items_df <- data.frame(record_id, title, display_date, full_text, usage, api_link, page_link, publisher)
   
-  api_link <- call_pages %>% 
-    rvest::html_nodes("search") %>% 
-    xml2::xml_find_all("//results/result/source-url") %>% 
-    rvest::html_text()
+  call_results_items_df <- mutate(call_results_items_df, 
+                                  search = search_term)
+  #head(call_results_items_df)
   
-  page_link <- call_pages %>% 
-    rvest::html_nodes("search") %>% 
-    xml2::xml_find_all("//results/result/landing-url") %>% 
-    rvest::html_text()
+  record_items_df <- dplyr::bind_rows
   
-  publisher <- call_pages %>% 
-    rvest::html_nodes("results") %>% 
-    xml2::xml_find_all("//results/result/content-partner") %>% 
-    rvest::html_text()
+  # Arrange scraped results as jsons: 
+  call_results_items_json <- serializeJSON(call_results_items_df, pretty = FALSE)
   
-  title <- call_pages %>% 
-    rvest::html_nodes("results") %>% 
-    xml2::xml_find_all("//results/result/title") %>% 
-    rvest::html_text()
+  # Encode as json-ld rdf (ON HOLD) 
   
-  usage <- call_pages %>% 
-    rvest::html_nodes("results") %>% 
-    xml2::xml_find_all("//results/result/usage") %>% 
-    rvest::html_text()
+  # Repeat for publishers 
+  # call_results_publishers_df <- data.frame(unique(publisher))
+ 
+
   
-  full_text  <- call_pages %>% 
-    rvest::html_nodes("results") %>% 
-    xml2::xml_find_all("//results/result/fulltext") %>% 
-    rvest::html_text()
+########################################  
   
-  # Arrange scraped results as dataframes: 
-  
-  call_results_items_df <- data.frame(record_id, title, date, full_text, usage, api_link, page_link, publisher)
-  mutate(call_results_df, 
-         ifelse(usage == "All rights reserved", full_text == ""))
-  
-  call_results_publishers_df <- data.frame(unique(publisher))
+  #  Additional to-do list: 
+  #     - sort out multi-page issue 
+  #     - add Linked.Art encoding 
+  #     - create sql-query box 
+  #     - sort out git push 
+  #     - save as json in github 
   
   
