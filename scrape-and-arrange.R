@@ -19,7 +19,8 @@ packages_to_install <- c("rvest",
                          "jsonlite",
                          "purrr",
                          "XML",
-                         "rjson"
+                         "rjson", 
+                         "stringr"
                          )
 
 for (i in length(packages_to_install)){
@@ -42,6 +43,7 @@ library(jsonlite)
 library(purrr)
 library(XML)
 library(rjson)
+library(stringr)
 
 
 #################################################
@@ -52,6 +54,7 @@ library(rjson)
   
   # url creation - adding specifiers: 
   search_term <- "&text=marae+flooding" 
+  search_term_clean <- str_remove(search_term, "&text=")
   #usage_term <- "&usage=Share" #only collect share-able items
   
 
@@ -110,17 +113,25 @@ library(rjson)
   #y <- c("")
   # <- harvest(doc, y)
 
-  # Arrange scraped results as dataframe: 
+  # Arrange scraped results as data frame: 
   call_results_items_df <- data.frame(record_id, title, display_date, full_text, usage, api_link, page_link, publisher)
   
   call_results_items_df <- mutate(call_results_items_df, 
-                                  search = search_term)
+                                  search = search_term_clean)
+  
+
+  
   #head(call_results_items_df)
   
-  record_items_df <- dplyr::bind_rows
+
+  # Bind different searches together 
+ # record_items_df <- dplyr::bind_rows( )
   
   # Arrange scraped results as jsons: 
   call_results_items_json <- serializeJSON(call_results_items_df, pretty = FALSE)
+  
+  # Save using search term as filename 
+  save(call_results_items_df, filename = paste("data/digital_nz_results_", search_term_clean, ".json"))
   
   # Encode as json-ld rdf (ON HOLD) 
   
@@ -132,10 +143,10 @@ library(rjson)
 ########################################  
   
   #  Additional to-do list: 
-  #     - sort out multi-page issue 
+  #     - sort out multi-page issue (known as Paging, see "Combining pages of JSON data with jsonlite")
   #     - add Linked.Art encoding 
   #     - create sql-query box 
-  #     - sort out git push 
+  #     - sort out saving multiple search terms into same json database 
   #     - save as json in github 
   
   
