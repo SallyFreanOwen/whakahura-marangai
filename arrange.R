@@ -10,31 +10,40 @@
 
 #################################################
 
+# clear workspace 
+rm(list = ls())
+
+# Call libraries:
+library(jsonlite)
+
+###
+
 # Bind different scraped searches together 
 dataframe_names <- list.files(path = "data/", pattern = "*.Rdata")
 dataframe_paths <- paste("data/", dataframe_names, sep = "")
 
-# Load all # NEEDS AUTOMATING
-  i=1
+# Load all 
+for (x in 1:length(dataframe_names)) {
+  i=x
   load(dataframe_paths[i])
   assign(paste("result_", i, sep = ""), results_items_df)
-  i=2
-  load(dataframe_paths[i])
-  assign(paste("result_", i, sep = ""), results_items_df)
-  i=3
-  load(dataframe_paths[i])
-  assign(paste("result_", i, sep = ""), results_items_df)
+}
+  rm(results_items_df, i, x)
+  
+  # Bind different searches:   # NEEDS AUTOMATING
+  prefix <- "result_"
+  suffix <- 1:length(dataframe_names)
+  list <- paste(prefix, suffix, sep = "")
+  x.list <- lapply(list, get)
+  results <- do.call(rbind, x.list)
 
-  rm(results_items_df)
-
-# Bind different searches:   # NEEDS AUTOMATING
-results <- rbind(result_1, result_2)
-results <- rbind(results, result_3)
+# Save as rdata
+save(results, file = "data/digital_nz_results.RData")
 
 # Arrange scraped results as jsons: 
 results_items_json <- serializeJSON(results, pretty = FALSE)
 
-# Save using search term as filename 
+# Save as json
 write(results_items_json, file = "data/digital_nz_results.json")
 
 # Encode:   

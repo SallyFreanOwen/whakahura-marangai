@@ -6,6 +6,8 @@
 
 #################################################
 
+rm(list = ls())
+
 # Prep: packages
 packages_to_install <- c("rvest", 
                          "dplyr", 
@@ -52,7 +54,9 @@ library(stringr)
   ### Using a set of phrases to search for records on DigitalNZ 
   
   # url creation - adding specifiers: 
-  search_term <- "&text=marae+flooding" 
+
+  search_term <- "&text=wananga+Rūaumoko" 
+
   search_term_clean <- str_remove(search_term, "&text=")
   #usage_term <- "&usage=Share" #only collect share-able items
 
@@ -180,15 +184,8 @@ library(stringr)
   filename <- paste("data/digital_nz_results_", search_term_clean, ".Rdata", sep = "")
   save(results_items_df, file = filename)
   
-  #head(call_results_items_df)
-  
-
-
-  
-  # Repeat for publishers 
-   #call_results_publishers_df <- data.frame(unique(results_items_df$publisher))
-  
-
+  # Clear all 
+  rm(list = ls())
   
   
   
