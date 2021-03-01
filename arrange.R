@@ -30,12 +30,13 @@ for (x in 1:length(dataframe_names)) {
 }
   rm(results_items_df, i, x)
   
-  # Bind different searches:   # NEEDS AUTOMATING
+  # Bind different searches:  
   prefix <- "result_"
   suffix <- 1:length(dataframe_names)
   list <- paste(prefix, suffix, sep = "")
   x.list <- lapply(list, get)
   results <- do.call(rbind, x.list)
+  rm(x.list,list, prefix, suffix)
 
 # Save as rdata
 save(results, file = "data/digital_nz_results.RData")
@@ -46,15 +47,19 @@ results_items_json <- serializeJSON(results, pretty = FALSE)
 # Save as json
 write(results_items_json, file = "data/digital_nz_results.json")
 
+
+# Extract Publisher information 
+# ublishers <- as.list(unique(results$publisher))
+
 # Encode:   
 
 # Encode as json-ld rdf (ON HOLD) 
 
+
+
 ########################################  
 
 ###  To-do list: 
-
-#     - add publishers option 
 
 #     - create new GitHub repository to host full public database 
 #     - add new website to that new rpo 
@@ -79,3 +84,5 @@ write(results_items_json, file = "data/digital_nz_results.json")
 # RDF	        subject	  predicate	    object
 # JSON	      object	  property	    value
 # spreadsheet	row id	  column name	  cell
+# data.frame	key	      variable	    measurement
+# data.frame	key	      attribute	    value
