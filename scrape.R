@@ -56,6 +56,36 @@ library(stringr)
   # url creation - adding specifiers: 
 
   search_term <- "&text=wananga+Rūaumoko" 
+  
+#earthquake
+#seismic activity 
+#rū whenua
+#rūaumoko 
+
+#extreme weather
+#flooding 
+#hail 
+#lightning 
+#storm 
+#waipake 
+#uanui
+#uaroa
+#uawhatu
+#uira 
+#āwha 
+#tūpuhi
+#marangai
+
+#marae
+#kainga
+#papakainga
+#kura kaupapa
+#hui 
+#wananga 
+#ūrupa 
+#māori village 
+#ngahere 
+#awa 
 
   search_term_clean <- str_remove(search_term, "&text=")
   #usage_term <- "&usage=Share" #only collect share-able items

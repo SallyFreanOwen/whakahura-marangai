@@ -20,8 +20,10 @@ results_raw <- results
 # usage 
 unique(results_raw$usage)
 #[1] "All rights reserved" "ShareModifyUse commercially" "ShareModify" "Share"  "Unknown"
-results <- dplyr::filter(results, usage !=  "All rights reserved") 
-
+results <- dplyr::transmute(results_raw, 
+                         full_text <- if_else(usage !=  "All rights reserved", 
+                                 full_text, 
+                                 "Unavailable, see source"))
 
 head(results)
   
