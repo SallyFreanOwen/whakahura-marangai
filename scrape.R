@@ -55,7 +55,7 @@ library(stringr)
   
   # url creation - adding specifiers: 
 
-  search_term <- "&text=wananga+Rūaumoko" 
+  search_term <- "&text=maori+village+flooding+rain+damage" 
   
 #earthquake
 #seismic activity 
@@ -67,7 +67,7 @@ library(stringr)
 #hail 
 #lightning 
 #storm 
-#waipake 
+# 
 #uanui
 #uaroa
 #uawhatu
@@ -107,6 +107,8 @@ library(stringr)
       rvest::html_text())
   
   print(paste("Using", search_term, "this scrape finds", result_count, "terms"))
+  
+
   
   harvest <- function(x, y) {output <- x %>% 
     rvest::html_nodes("search") %>% 

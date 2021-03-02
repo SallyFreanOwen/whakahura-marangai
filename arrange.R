@@ -30,6 +30,7 @@ for (x in 1:length(dataframe_names)) {
 }
   rm(results_items_df, i, x)
   
+  
   # Bind different searches:  
   prefix <- "result_"
   suffix <- 1:length(dataframe_names)
@@ -37,12 +38,12 @@ for (x in 1:length(dataframe_names)) {
   x.list <- lapply(list, get)
   results <- do.call(rbind, x.list)
   rm(x.list,list, prefix, suffix)
-
+  
 # Save as rdata
 save(results, file = "data/digital_nz_results.RData")
 
 # Arrange scraped results as jsons: 
-results_items_json <- serializeJSON(results, pretty = FALSE)
+results_items_json <- serializeJSON(results, pretty = TRUE)
 
 # Save as json
 write(results_items_json, file = "data/digital_nz_results.json")

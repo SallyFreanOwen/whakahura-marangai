@@ -10,6 +10,8 @@ rm(list = ls())
 
 # call libraries
 library(dplyr)
+library(tidyselect)
+library(tidyr)
 
 # Open data
 load("data/digital_nz_results.RData")
@@ -17,13 +19,18 @@ load("data/digital_nz_results.RData")
 # clean 
 results_raw <- results
 
+results <- dplyr::distinct(results_raw, record_id, .keep_all = TRUE)
+
 # usage 
 unique(results_raw$usage)
 #[1] "All rights reserved" "ShareModifyUse commercially" "ShareModify" "Share"  "Unknown"
-results <- dplyr::transmute(results_raw, 
-                         full_text <- if_else(usage !=  "All rights reserved", 
-                                 full_text, 
-                                 "Unavailable, see source"))
 
-head(results)
-  
+results <- mutate(results, 
+              text <- ifelse(usage == "All rights reserved", "See source", full_text))
+results <- rename(results[12], text)
+results <- select(results, full_text)
+rename
+
+save(results, file = "data/records_for_quality_assuring.RData")
+
+write.csv(results, file = "data/records_for_quality_assuring.csv")
